@@ -6,30 +6,52 @@ const router = Router();
 const SECRET_KEY = "your_secret_key";
 const { sign } = jwt;
 import Alumini from "../models/Alumini.js";
+import Application from "../models/ApplicationSchema.js";
 
 // User Registration
 router.post("/register", async (req, res) => {
 	try {
-		console.log(req.body);
-		const { username, email, password } = req.body;
-		const existingUser = await Student.findOne({ username }); // ✅ FIXED
+		
 
-		if (existingUser) {
-			return res.status(400).json({ message: "Username already exists" });
-		}
-
-		const hashedPassword = await hash(password, 10);
-		const newStudent = new Student({
-			username,
-			email,
-			password: hashedPassword,
-		});
-		await newStudent.save();
-		res.status(201).json({ message: "User registered successfully" });
+	  const { username, email, password } = req.body;
+  
+	  // Check for existing user
+	  const existingUser = await Student.findOne({ email });
+	  console.log("logged");
+	  if (existingUser) {
+		return res.status(400).json({ message: "user already exists" });
+	  }
+	
+  
+	  // Hash password
+	  const hashedPassword = await hash(password, 10);
+  
+	  // Create new student
+	  const newStudent = new Student({
+		username,
+		email,
+		password: hashedPassword,
+	  });
+  
+	  // Save student first
+	  const savedStudent = await newStudent.save();
+  
+	  // Create corresponding application
+	  const newApplication = new Application({
+		student: savedStudent._id,
+	  });
+	  const savedApplication = await newApplication.save();
+  
+	  // Update student with application ID
+	  savedStudent.applicationId = savedApplication._id;
+	  await savedStudent.save();
+  
+	  res.status(201).json({ message: "User registered successfully" });
 	} catch (error) {
-		res.status(500).json({ message: "Error registering user", error });
+	  res.status(500).json({ message: "Error registering user", error });
 	}
-});
+  });
+  
 
 router.post("/aluminiRegister", async (req, res) => {
 	try {

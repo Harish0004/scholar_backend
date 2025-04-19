@@ -1,24 +1,15 @@
-import { Schema, model } from "mongoose";
+import mongoose from 'mongoose';
 
-const UserSchema = new Schema(
-	{
-		username: {
-			type: String,
-			unique: true,
-			required: true,
-		},
-		email: {
-			type: String,
-			required: true,
-		},
-		password: {
-			type: String,
-			required: true,
-		},
-	},
-	{ timestamps: true },
-);
+const studentSchema = new mongoose.Schema({
+  username: { type: String, required: true, unique: true }, // changed from name
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  branch: { type: String },
+  graduationYear: { type: Number },
+  cgpa: { type: Number },
+  familyIncome: { type: Number },
+  bio: { type: String },
+  applicationId: { type: mongoose.Schema.Types.ObjectId, ref: 'Application' },
+}, { timestamps: true });
 
-const Student = model("Student", UserSchema);
-
-export default Student;
+export default mongoose.model('Student', studentSchema);
